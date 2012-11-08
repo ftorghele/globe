@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 	<head>
-		<title>learningthree.js boiler plate for three.js</title>
+		<title>eoVision</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		
@@ -11,7 +11,6 @@
 		<!-- https://github.com/mrdoob/stats.js -->
 		<script src="vendor/three.js/Stats.js"></script>
 
-		<script src="vendor/threex/THREEx.screenshot.js"></script>
 		<script src="vendor/threex/THREEx.FullScreen.js"></script>
 		<script src="vendor/threex/THREEx.WindowResize.js"></script>
 		<script src="vendor/threex.dragpancontrols.js"></script>
@@ -20,18 +19,7 @@
 	</head>
 <body>
 	<!-- three.js container -->
-    	<div id="container"></div>
-	<!-- info on screen display -->
-	<div id="info">
-		<div class="top">
-			<a href="http://learningthreejs.com/blog/2011/12/20/boilerplate-for-three-js/" target="_blank">LearningThree.js</a>
-			boiler plate for
-			<a href="https://github.com/mrdoob/three.js/" target="_blank">three.js</a>
-		</div>
-		<div class="bottom" id="inlineDoc" >
-			- <i>p</i> for screenshot
-		</div> 
-	</div> 
+    <div id="container"></div>
 
 	<script type="text/javascript">
 		var stats, scene, renderer;
@@ -49,10 +37,6 @@
 					preserveDrawingBuffer	: true	// to allow screenshot
 				});
 				renderer.setClearColorHex( 0xBBBBBB, 1 );
-			// uncomment if webgl is required
-			//}else{
-			//	Detector.addGetWebGLMessage();
-			//	return true;
 			}else{
 				renderer	= new THREE.CanvasRenderer();
 			}
@@ -69,8 +53,8 @@
 			scene = new THREE.Scene();
 
 			// put a camera in the scene
-			camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 10000 );
-			camera.position.set(0, 0, 5);
+			camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000 );
+			camera.position.set(0, 0, 20);
 			scene.add(camera);
 
 			// create a camera contol
@@ -78,20 +62,19 @@
 
 			// transparently support window resize
 			THREEx.WindowResize.bind(renderer, camera);
-			// allow 'p' to make screenshot
-			THREEx.Screenshot.bindKey(renderer);
-			// allow 'f' to go fullscreen where this feature is supported
-			if( THREEx.FullScreen.available() ){
-				THREEx.FullScreen.bindKey();		
-				document.getElementById('inlineDoc').innerHTML	+= "- <i>f</i> for fullscreen";
-			}
 
 			// here you add your objects
-			// - you will most likely replace this part by your own
-			var geometry	= new THREE.TorusGeometry( 1, 0.42 );
-			var material	= new THREE.MeshNormalMaterial();
-			var mesh	= new THREE.Mesh( geometry, material );
-			scene.add( mesh );
+            var texture = THREE.ImageUtils.loadTexture('./images/planet_texture.jpg', {}, function() {
+                renderer.render(scene, camera);
+            });
+
+            var sphereMaterial = new THREE.MeshBasicMaterial( { map: texture } );
+
+            texture.needsUpdate = true;
+            // sphere
+            var sphere = new THREE.Mesh(new THREE.SphereGeometry(5, 25, 25),sphereMaterial);
+            sphere.overdraw = true;
+            scene.add(sphere);
 		}
 
 		// animation loop
