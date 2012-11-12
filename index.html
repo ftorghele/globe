@@ -1,106 +1,125 @@
-<!doctype html>
-<html>
-	<head>
-		<title>eoVision</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		
-			
-		<script src="vendor/three.js/Three.js"></script>
-		<script src="vendor/three.js/Detector.js"></script>
-		<!-- https://github.com/mrdoob/stats.js -->
-		<script src="vendor/three.js/Stats.js"></script>
-
-		<script src="vendor/threex/THREEx.FullScreen.js"></script>
-		<script src="vendor/threex/THREEx.WindowResize.js"></script>
-		<script src="vendor/threex.dragpancontrols.js"></script>
-
-		<link  href="css/main.css" rel="stylesheet"/>
-	</head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>eoVision</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link  href="css/main.css" rel="stylesheet"/>
+</head>
 <body>
-	<!-- three.js container -->
     <div id="container"></div>
 
-	<script type="text/javascript">
-		var stats, scene, renderer;
-		var camera, cameraControls;
+    <script src="js/three.min.js"></script>
+    <script src="js/stats.min.js"></script>
+    <script src="js/detector.js"></script>
+    <script src="js/trackballControls.js"></script>
+    <script src="js/threex.WindowResize.js"></script>
+
+    <script type="text/javascript">
+        var stats, scene, renderer,
+        camera, controls, mesh,
+
+        clock = new THREE.Clock();
 
 
-		if( !init() )	animate();
+        if( !init() )	animate();
 
-		// init the scene
-		function init(){
+        // init the scene
+        function init(){
 
-			if( Detector.webgl ){
-				renderer = new THREE.WebGLRenderer({
-					antialias		: true,	// to get smoother output
-					preserveDrawingBuffer	: true	// to allow screenshot
-				});
-				renderer.setClearColorHex( 0xBBBBBB, 1 );
-			}else{
-				renderer	= new THREE.CanvasRenderer();
-			}
-			renderer.setSize( window.innerWidth, window.innerHeight );
-			document.getElementById('container').appendChild(renderer.domElement);
+            if( Detector.webgl ){
+                renderer = new THREE.WebGLRenderer({
+                    antialias		: true,	// to get smoother output
+                    preserveDrawingBuffer	: true	// to allow screenshot
+                });
+                renderer.setClearColorHex( 0xBBBBBB, 1 );
+            }else{
+                renderer	= new THREE.CanvasRenderer();
+            }
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            document.getElementById('container').appendChild(renderer.domElement);
 
-			// add Stats.js - https://github.com/mrdoob/stats.js
-			stats = new Stats();
-			stats.domElement.style.position	= 'absolute';
-			stats.domElement.style.bottom	= '0px';
-			document.body.appendChild( stats.domElement );
+            // add Stats.js - https://github.com/mrdoob/stats.js
+            stats = new Stats();
+            stats.domElement.style.position	= 'absolute';
+            stats.domElement.style.bottom	= '0px';
+            document.body.appendChild( stats.domElement );
 
-			// create a scene
-			scene = new THREE.Scene();
+            // create a scene
+            scene = new THREE.Scene();
 
-			// put a camera in the scene
-			camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000 );
-			camera.position.set(0, 0, 20);
-			scene.add(camera);
+            // put a camera in the scene
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 10000 );
+            camera.position.set(0, 0, 500);
+            scene.add(camera);
 
-			// create a camera contol
-			cameraControls	= new THREEx.DragPanControls(camera)
+            controls = new THREE.TrackballControls( camera, renderer.domElement );
 
-			// transparently support window resize
-			THREEx.WindowResize.bind(renderer, camera);
+            controls.rotateSpeed = 1.0;
+            controls.zoomSpeed = 1.2;
+            controls.panSpeed = 0.2;
 
-			// here you add your objects
-            var texture = THREE.ImageUtils.loadTexture('./images/planet_texture.jpg', {}, function() {
-                renderer.render(scene, camera);
+            controls.noZoom = false;
+            controls.noPan = false;
+
+            controls.staticMoving = false;
+            controls.dynamicDampingFactor = 0.3;
+
+            controls.minDistance = 200 * 1.1;
+            controls.maxDistance = 200 * 100;
+
+            controls.keys = [ 65, 83, 68 ]; // [ rotateKey, zoomKey, panKey ]
+
+            // transparently support window resize
+            THREEx.WindowResize.bind(renderer, camera);
+
+            var earthTexture = new THREE.Texture();
+            var loader = new THREE.ImageLoader();
+
+            loader.addEventListener('load', function (event) {
+
+                earthTexture.image = event.content;
+                earthTexture.needsUpdate = true;
+
             });
 
-            var sphereMaterial = new THREE.MeshBasicMaterial( { map: texture } );
+            loader.load('images/earth_atmos_2048.jpg');
 
-            texture.needsUpdate = true;
-            // sphere
-            var sphere = new THREE.Mesh(new THREE.SphereGeometry(5, 25, 25),sphereMaterial);
-            sphere.overdraw = true;
-            scene.add(sphere);
-		}
+            var geometry = new THREE.SphereGeometry(200, 25, 25);
+            var material = new THREE.MeshBasicMaterial({ map:earthTexture, overdraw:true });
 
-		// animation loop
-		function animate() {
+            mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+        }
 
-			// loop on request animation loop
-			// - it has to be at the begining of the function
-			// - see details at http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
-			requestAnimationFrame( animate );
+        // animation loop
+        function animate() {
 
-			// do the render
-			render();
+            // loop on request animation loop
+            // - it has to be at the begining of the function
+            // - see details at http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
+            requestAnimationFrame( animate );
 
-			// update stats
-			stats.update();
-		}
+            // do the render
+            render();
 
-		// render the scene
-		function render() {
+            // update stats
+            stats.update();
+        }
 
-			// update camera controls
-			cameraControls.update();
+        // render the scene
+        function render() {
 
-			// actually render the scene
-			renderer.render( scene, camera );
-		}
-	</script>
+            var delta = clock.getDelta();
+
+            mesh.rotation.y += 0.1 * delta;
+
+            // update camera controls
+            controls.update();
+
+            // actually render the scene
+            renderer.render( scene, camera );
+        }
+    </script>
 </body>
 </html>
