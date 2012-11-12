@@ -392,11 +392,33 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	}
 
+    function touchstart( event ) {
+        if (event.touches.length != 1) return;
+
+        var touch = event.touches[0];
+        event['clientX'] = touch.clientX;
+        event['clientY'] = touch.clientY;
+        event['button'] = 0;
+        mousedown( event );
+    }
+    function touchmove( event ) {
+        if (event.touches.length != 1) return;
+
+        var touch = event.touches[0];
+        event['clientX'] = touch.clientX;
+        event['clientY'] = touch.clientY;
+        mousemove( event );
+    }
+
 	this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
 	this.domElement.addEventListener( 'mousedown', mousedown, false );
 	this.domElement.addEventListener( 'DOMMouseScroll', mousewheel, false );
 	this.domElement.addEventListener( 'mousewheel', mousewheel, false );
+
+    this.domElement.addEventListener( 'touchmove', touchmove, false );
+    this.domElement.addEventListener( 'touchstart', touchstart, false );
+    this.domElement.addEventListener( 'touchend', mouseup, false );
 
 	window.addEventListener( 'keydown', keydown, false );
 	window.addEventListener( 'keyup', keyup, false );
