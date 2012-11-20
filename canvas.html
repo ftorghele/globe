@@ -16,9 +16,9 @@
 
 <script type="text/javascript">
     var stats, scene, renderer,
-    camera, controls, mesh,
+    camera, controls, mesh;
 
-    clock = new THREE.Clock();
+    //clock = new THREE.Clock();
 
 
     if( !init() )	animate();
@@ -101,9 +101,8 @@
     // render the scene
     function render() {
 
-        var delta = clock.getDelta();
-
-        mesh.rotation.y += 0.1 * delta;
+        //var delta = clock.getDelta();
+        //mesh.rotation.y += 0.1 * delta;
 
         // update camera controls
         controls.update();
